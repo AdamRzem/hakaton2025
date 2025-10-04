@@ -22,11 +22,15 @@ export default function LoginPage() {
     // Quick-access: entering 'a' in either email or password (trimmed, case-insensitive)
     // takes you directly to the main app (index).
     const e = email.trim().toLowerCase();
+<<<<<<< Updated upstream
     const p = password.trim().toLowerCase();
     if (e === 'a' || p === 'a') {
       router.replace('/');
       return;
     }
+=======
+    const p = password.trim();
+>>>>>>> Stashed changes
 
     if (!email || !password) {
       setError('Please enter both email and password.');

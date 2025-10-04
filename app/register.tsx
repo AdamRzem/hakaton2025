@@ -6,7 +6,12 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Fonts, Palette } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { client } from './utils/trpcClient';
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
