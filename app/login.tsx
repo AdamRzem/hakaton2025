@@ -54,7 +54,7 @@ export default function LoginPage() {
   const titleColors = [Palette.accentPink, Palette.accentGreen, Palette.accentYellow, Palette.accentBlue, Palette.accentPurple];
 
   return (
-    <ThemedView lightColor="#ffffff" darkColor="#ffffff" style={styles.container}>
+    <ThemedView lightColor="#ffffff" darkColor="#000" style={styles.container}>
       <View style={styles.titleCard}>
         <View style={styles.titleRow}>
           {title.split('').map((ch, i) => (
@@ -129,7 +129,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#ffffff',
   },
   titleRow: {
     flexDirection: 'row',
