@@ -1,127 +1,112 @@
-// app/(tabs)/explore.tsx
-import React, { useEffect, useState } from 'react';
-import { Alert, Button, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { addItem, deleteItem, getAllItems } from '../database';
-import useDatabase from '../hooks/useDatabase';
+import { Image } from 'expo-image';
+import { Platform, StyleSheet } from 'react-native';
 
-type Item = {
-  id: number;
-  name: string;
-  created_at?: string;
-};
+import { ExternalLink } from '@/components/external-link';
+import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Collapsible } from '@/components/ui/collapsible';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Fonts } from '@/constants/theme';
 
-export default function ExploreScreen() {
-  const { ready, error } = useDatabase();
-  const [items, setItems] = useState<Item[]>([]);
-  const [text, setText] = useState('');
-
-  useEffect(() => {
-    if (ready) {
-      load();
-    }
-  }, [ready]);
-
-  async function load() {
-    try {
-      const rows = await getAllItems();
-      setItems(rows);
-    } catch (err) {
-      console.error(err);
-      Alert.alert('DB error', 'Could not load items');
-    }
-  }
-
-  async function handleAdd() {
-    if (!text.trim()) return;
-    try {
-      await addItem(text.trim());
-      setText('');
-      await load();
-    } catch (err) {
-      console.error(err);
-      Alert.alert('DB error', 'Could not add item');
-    }
-  }
-
-  async function handleDelete(id: number) {
-    try {
-      await deleteItem(id);
-      await load();
-    } catch (err) {
-      console.error(err);
-      Alert.alert('DB error', 'Could not delete item');
-    }
-  }
-
-  if (error) {
-    return (
-      <View style={styles.center}>
-        <Text>DB initialization error: {String(error)}</Text>
-      </View>
-    );
-  }
-
-  if (!ready) {
-    return (
-      <View style={styles.center}>
-        <Text>Initializing database...</Text>
-      </View>
-    );
-  }
-
+export default function TabTwoScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>SQLite demo</Text>
-
-      <View style={styles.row}>
-        <TextInput
-          placeholder="New item name"
-          value={text}
-          onChangeText={setText}
-          style={styles.input}
+    <ParallaxScrollView
+      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerImage={
+        <IconSymbol
+          size={310}
+          color="#808080"
+          name="chevron.left.forwardslash.chevron.right"
+          style={styles.headerImage}
         />
-        <Button title="Add" onPress={handleAdd} />
-      </View>
-
-      <FlatList
-        data={items}
-        keyExtractor={(item) => String(item.id)}
-        ListEmptyComponent={() => <Text style={styles.empty}>No items yet</Text>}
-        renderItem={({ item }) => (
-          <View style={styles.itemRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.itemText}>{item.name}</Text>
-              <Text style={styles.itemDate}>{item.created_at}</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() =>
-                Alert.alert('Delete', `Delete "${item.name}"?`, [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Delete', style: 'destructive', onPress: () => handleDelete(item.id) },
-                ])
-              }
-            >
-              <Text style={styles.deleteText}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        contentContainerStyle={{ paddingBottom: 40 }}
-      />
-    </View>
+      }>
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText
+          type="title"
+          style={{
+            fontFamily: Fonts.rounded,
+          }}>
+          Explore
+        </ThemedText>
+      </ThemedView>
+      <ThemedText>This app includes example code to help you get started.</ThemedText>
+      <Collapsible title="File-based routing">
+        <ThemedText>
+          This app has two screens:{' '}
+          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
+          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
+        </ThemedText>
+        <ThemedText>
+          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
+          sets up the tab navigator.
+        </ThemedText>
+        <ExternalLink href="https://docs.expo.dev/router/introduction">
+          <ThemedText type="link">Learn more</ThemedText>
+        </ExternalLink>
+      </Collapsible>
+      <Collapsible title="Android, iOS, and web support">
+        <ThemedText>
+          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
+          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
+        </ThemedText>
+      </Collapsible>
+      <Collapsible title="Images">
+        <ThemedText>
+          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
+          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
+          different screen densities
+        </ThemedText>
+        <Image
+          source={require('@/assets/images/react-logo.png')}
+          style={{ width: 100, height: 100, alignSelf: 'center' }}
+        />
+        <ExternalLink href="https://reactnative.dev/docs/images">
+          <ThemedText type="link">Learn more</ThemedText>
+        </ExternalLink>
+      </Collapsible>
+      <Collapsible title="Light and dark mode components">
+        <ThemedText>
+          This template has light and dark mode support. The{' '}
+          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
+          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
+        </ThemedText>
+        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
+          <ThemedText type="link">Learn more</ThemedText>
+        </ExternalLink>
+      </Collapsible>
+      <Collapsible title="Animations">
+        <ThemedText>
+          This template includes an example of an animated component. The{' '}
+          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
+          the powerful{' '}
+          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
+            react-native-reanimated
+          </ThemedText>{' '}
+          library to create a waving hand animation.
+        </ThemedText>
+        {Platform.select({
+          ios: (
+            <ThemedText>
+              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
+              component provides a parallax effect for the header image.
+            </ThemedText>
+          ),
+        })}
+      </Collapsible>
+    </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  title: { fontSize: 20, fontWeight: '700', marginBottom: 12 },
-  row: { flexDirection: 'row', marginBottom: 12, alignItems: 'center' },
-  input: { flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 6, padding: 8, marginRight: 8 },
-  empty: { textAlign: 'center', marginTop: 16, color: '#666' },
-  itemRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#eee' },
-  itemText: { fontSize: 16 },
-  itemDate: { fontSize: 12, color: '#888' },
-  deleteButton: { paddingHorizontal: 12, paddingVertical: 6 },
-  deleteText: { color: 'red', fontWeight: '600' },
+  headerImage: {
+    color: '#808080',
+    bottom: -90,
+    left: -35,
+    position: 'absolute',
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
 });
