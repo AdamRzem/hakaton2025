@@ -19,14 +19,11 @@ export default function App() {
     />
   )
   return (
-    <>
     <View style={styles.container}>
       <MapView style={styles.map}>
         {markerList}
         </MapView>
     </View>
-      <Button onPress={add_marker} title="➕ Add marker📌"/>
-    </>
   );
 }
 
