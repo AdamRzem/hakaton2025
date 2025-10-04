@@ -30,6 +30,7 @@ model Report{
   user User? @relation(fields: [userId],references: [userId])
   date DateTime
   location String
+  lineNumber Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
