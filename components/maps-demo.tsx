@@ -1,33 +1,29 @@
 
 import React from 'react';
-import { Button, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
-
-function add_marker(){
-
-}
-
 export default function App() {
-  const markers = [
-      {
-      description:"Kubots home'nt",
-      coordinate:{latitude: -34.397, longitude: 150.644}
-      }
+  const backend_list = [
+    {
+      _id:0,
+      description:"ae",
+      coordinate:{latitude:0.0,longitude:0.0}
+    }
   ];
-  //TODO: link markers to database
-  const markersList = markers.map(marker => 
+  const markerList = backend_list.map(marker=>
     <Marker 
-      description={marker.description}
-      coordinate={marker.coordinate}
+    key={marker._id}
+    description={marker.description}
+    coordinate={marker.coordinate}
     />
   )
   return (
     <>
     <View style={styles.container}>
       <MapView style={styles.map}>
-        {markersList}
-      </MapView>
+        {markerList}
+        </MapView>
     </View>
       <Button onPress={add_marker} title="➕ Add marker📌"/>
     </>
