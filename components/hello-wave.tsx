@@ -13,7 +13,7 @@ export function HelloWave() {
         animationIterationCount: 4,
         animationDuration: '300ms',
       }}>
-      👋
+      👋We love sniffing glue
     </Animated.Text>
   );
 }
