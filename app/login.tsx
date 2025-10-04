@@ -100,7 +100,7 @@ export default function LoginPage() {
         <ThemedText style={[styles.buttonText, { fontFamily: (Fonts as any).rounded }]}>Login</ThemedText>
       </TouchableOpacity>
       <View style={styles.footerRow}>
-        <ThemedText style={[styles.smallText, { marginRight: 6 }]}>Don't have an account?</ThemedText>
+  <ThemedText style={[styles.smallText, { marginRight: 6 }]}>Don&apos;t have an account?</ThemedText>
         <Link href="/register" style={styles.loginLink}>
           <ThemedText style={[styles.smallText, { color: tint }]}>Create one</ThemedText>
         </Link>

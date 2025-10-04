@@ -45,6 +45,14 @@ export default function TabLayout() {
             tabBarStyle: { display: 'flex' },
           }}
         />
+        <Tabs.Screen
+          name="report"
+          options={{
+            title: 'Report',
+            tabBarIcon: ({ color }) => <IconSymbol size={14} name="map.fill" color={color} />,
+            tabBarStyle: { display: 'flex' },
+          }}
+        />
     </Tabs>
   );
 }
