@@ -13,6 +13,7 @@
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
     "@prisma/client": "^6.16.3",
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/geolocation": "^3.4.0",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
@@ -21,7 +22,6 @@
     "@trpc/client": "^11.6.0",
     "@trpc/server": "^11.6.0",
     "@trpc/tanstack-react-query": "^11.6.0",
-  "@react-native-async-storage/async-storage": "^1.17.11",
     "@types/jsonwebtoken": "^9.0.10",
     "argon2": "^0.44.0",
     "bun": "^1.2.23",

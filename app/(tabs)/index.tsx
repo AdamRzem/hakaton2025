@@ -3,10 +3,9 @@ import { Palette } from '@/constants/theme';
 import { Image } from 'expo-image';
 import { StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 
-
-import { getAuth } from '@/app/utils/auth';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedView } from '@/components/themed-view';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 
 function pickColor(index?: number) {
@@ -26,6 +25,7 @@ function pickColor(index?: number) {
 function Card({ title, body, borderColor }: { title: string; body: string; borderColor?: string }) {
   const border = borderColor ?? pickColor();
   const isDarkTheme = useColorScheme() ==='dark';
+
   return (
     <View
       style={{
@@ -44,17 +44,14 @@ function Card({ title, body, borderColor }: { title: string; body: string; borde
 }
 
 function WelcomeContent() {
-  const [email, setEmail] = useState<string | null>(null);
-
+  const [name, setName] = useState('User');
   useEffect(() => {
     (async () => {
-      try {
-        const a = await getAuth();
-        setEmail(a.email);
-      } catch (e) {
-        // ignore
+      const token = await AsyncStorage.getItem("token");
+      if (token) {
+        setName(token);
       }
-    })();
+    })()
   }, []);
   const isDarkTheme = useColorScheme() ==='dark';
   const cards = [
@@ -67,7 +64,7 @@ function WelcomeContent() {
     <ThemedView lightColor="#fff" darkColor="#000">
       
       <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16, color: Palette.accentPink }}>
-        Welcome{email ? `, ${email}` : ', user'}
+        Welcome {name}
       </Text>
       {cards.map((c, idx) => (
         <Card key={idx} title={c.title} body={c.body} borderColor={pickColor(idx)} />

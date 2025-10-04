@@ -6,7 +6,17 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Fonts, Palette } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { client } from './utils/trpcClient';
+import { trpc } from '@/utils/trpc';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useMutation } from '@tanstack/react-query';
+
+// const client = createTRPCProxyClient<AppRouter>({
+//   links: [
+//     httpBatchLink({
+//       url: 'http://192.168.0.234:3000',
+//     }),
+//   ],
+// });
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -18,8 +28,8 @@ export default function RegisterPage() {
   const tint = useThemeColor({}, 'tint');
   const textColor = useThemeColor({}, 'text');
   const placeholderColor = useThemeColor({}, 'icon');
-
-  const handleRegister = () => {
+  const registrator = useMutation(trpc.register.mutationOptions());
+  const handleRegister = async () => {
 
     if (!email || !password || !confirmPassword) {
       setError('Please fill out all fields.');
@@ -31,9 +41,11 @@ export default function RegisterPage() {
     }
 
     setError('');
-    const token = client.register.mutate({ email, password });
+    
+    const token = await registrator.mutateAsync({ email, password });
     console.log(token);
-    alert('Registration submitted!');
+    await AsyncStorage.setItem('token', token);
+    router.replace('/(tabs)');
   };
 
   const title = 'REGISTER';
@@ -107,7 +119,7 @@ export default function RegisterPage() {
       </View>
 
       {error ? (
-        <ThemedText style={[styles.error, { color: tint }]}> 
+        <ThemedText style={[styles.error, { color: tint }]}>
           {error}
         </ThemedText>
       ) : null}
