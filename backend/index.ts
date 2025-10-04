@@ -1,9 +1,11 @@
+import { TRPCError } from "@trpc/server";
 import argon from "argon2";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { db } from "./db";
 import { publicProcedure, router } from './trpc';
 const SUPER_SECRET_KEY = "testing" as const;
+
 const appRouter = router({
     register: publicProcedure.input(z.object({ email: z.email(), password: z.string() })).mutation(async (opts) => {
         const hash = await argon.hash(opts.input.password)
@@ -22,6 +24,26 @@ const appRouter = router({
         return jwt.sign(user.userId, SUPER_SECRET_KEY)
 
 
+    }),
+    report: publicProcedure.input(z.object({ toke: z.string(), location: z.string(), date: z.date(), lineNumber: z.number().optional() })).mutation(async (opts) => {
+        let userId = "";
+        try {
+            const out = jwt.verify(opts.input.toke, SUPER_SECRET_KEY);
+            if (typeof out !== "string") {
+                throw new TRPCError({ message: "not authorized", code: "FORBIDDEN" });
+            }
+            else {
+                userId = out;
+            }
+        }
+        catch {
+            throw new TRPCError({ message: "not authorized", code: "FORBIDDEN" });
+
+        }
+        await db.report.create({ data: { date: opts.input.date, location: opts.input.location, userId: userId, lineNumber: opts.input.lineNumber } })
+    }),
+    getReports: publicProcedure.query(async (opts) => {
+        return db.report.findMany()
     })
 });
 
