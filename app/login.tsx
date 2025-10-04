@@ -7,39 +7,36 @@ import { ThemedView } from '@/components/themed-view';
 import { Fonts, Palette } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+
   const router = useRouter();
 
   const tint = useThemeColor({}, 'tint');
   const textColor = useThemeColor({}, 'text');
   const placeholderColor = useThemeColor({}, 'icon');
 
-  const handleRegister = () => {
-    // Quick-access: if both passwords are exactly 'a' and email is 'a' (or empty),
-    // treat as quick login to the lite app for testing.
-    if ((password === 'a' && confirmPassword === 'a') && (email === 'a' || email === '')) {
-      // navigate to main index (root path)
+  const handleLogin = () => {
+    // Quick-access: entering 'a' in either email or password (trimmed, case-insensitive)
+    // takes you directly to the main app (index).
+    const e = email.trim().toLowerCase();
+    const p = password.trim().toLowerCase();
+    if (e === 'a' || p === 'a') {
       router.replace('/');
       return;
     }
 
-    if (!email || !password || !confirmPassword) {
-      setError('Please fill out all fields.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+    if (!email || !password) {
+      setError('Please enter both email and password.');
       return;
     }
     setError('');
-    alert('Registration submitted!');
+    alert('Login submitted!');
   };
 
-  const title = 'REGISTER';
+  const title = 'LOGIN';
   const titleColors = [Palette.accentPink, Palette.accentGreen, Palette.accentYellow, Palette.accentBlue, Palette.accentPurple];
 
   return (
@@ -93,35 +90,19 @@ export default function RegisterPage() {
         />
       </View>
 
-      <View style={styles.inputWrapper}>
-        <View style={styles.colorStrip}>
-          {titleColors.map((c, idx) => (
-            <View key={idx} style={[styles.colorSegment, { backgroundColor: c }]} />
-          ))}
-        </View>
-        <TextInput
-          style={[styles.input, { borderColor: '#000', color: '#000' }]}
-          placeholder="Confirm Password"
-          placeholderTextColor={placeholderColor}
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-        />
-      </View>
-
       {error ? (
         <ThemedText style={[styles.error, { color: tint }]}> 
           {error}
         </ThemedText>
       ) : null}
 
-      <TouchableOpacity style={[styles.button, { backgroundColor: '#2b2b2b' }]} onPress={handleRegister} activeOpacity={0.9}>
-        <ThemedText style={[styles.buttonText, { fontFamily: (Fonts as any).rounded }]}>Register</ThemedText>
+      <TouchableOpacity style={[styles.button, { backgroundColor: '#2b2b2b' }]} onPress={handleLogin} activeOpacity={0.9}>
+        <ThemedText style={[styles.buttonText, { fontFamily: (Fonts as any).rounded }]}>Login</ThemedText>
       </TouchableOpacity>
       <View style={styles.footerRow}>
-        <ThemedText style={[styles.smallText, { marginRight: 6 }]}>Already have an account?</ThemedText>
-        <Link href="/login" style={styles.loginLink}>
-          <ThemedText style={[styles.smallText, { color: tint }]}>Log in</ThemedText>
+  <ThemedText style={[styles.smallText, { marginRight: 6 }]}>Don&apos;t have an account?</ThemedText>
+        <Link href="/register" style={styles.loginLink}>
+          <ThemedText style={[styles.smallText, { color: tint }]}>Create one</ThemedText>
         </Link>
       </View>
     </ThemedView>
@@ -231,4 +212,3 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
 });
-
