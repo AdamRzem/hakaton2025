@@ -5,26 +5,38 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+
+
+export const Palette = {
+  accentPink: '#e62d67',
+  accentGreen: '#69b03e',
+  accentYellow: '#f6ba2b',
+  accentBlue: '#1daed9',
+  accentPurple: '#5c5693'
+};
+
 
 export const Colors = {
   light: {
     text: '#11181C',
     background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    tint: Palette.accentPink,
+    icon: Palette.accentPurple,
+    tabIconDefault: Palette.accentBlue,
+    tabIconSelected: Palette.accentPink,
+    card: Palette.accentYellow,
+    cardSecondary: Palette.accentGreen
   },
   dark: {
     text: '#ECEDEE',
     background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
-  },
+    tint: Palette.accentPink,
+    icon: Palette.accentPurple,
+    tabIconDefault: Palette.accentBlue,
+    tabIconSelected: Palette.accentPink,
+    card: Palette.accentYellow,
+    cardSecondary: Palette.accentGreen
+  }
 };
 
 export const Fonts = Platform.select({

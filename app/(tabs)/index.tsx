@@ -1,79 +1,103 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
+import { Palette } from '@/constants/theme';
+import { Image } from 'expo-image';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+
 import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+
+function pickColor(index?: number) {
+  const colors = [
+    Palette.accentPink,
+    Palette.accentGreen,
+    Palette.accentYellow,
+    Palette.accentBlue,
+    Palette.accentPurple,
+  ];
+  if (typeof index === 'number') {
+    return colors[index % colors.length];
+  }
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function Card({ title, body, borderColor }: { title: string; body: string; borderColor?: string }) {
+  const border = borderColor ?? pickColor();
+  return (
+    <View
+      style={{
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: border,
+      }}
+    >
+      <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 8, color: '#111' }}>{title}</Text>
+      <Text style={{ fontSize: 14, color: '#555' }}>{body}</Text>
+    </View>
+  );
+}
+
+function WelcomeContent() {
+  const cards = [
+    { title: 'Card 1', body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
+    { title: 'Card 2', body: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
+    { title: 'Card 3', body: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.' },
+  ];
+
+  return (
+    <View>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16, color: Palette.accentPink }}>
+        Welcome, user
+      </Text>
+      {cards.map((c, idx) => (
+        <Card key={idx} title={c.title} body={c.body} borderColor={pickColor(idx)} />
+      ))}
+      <View style={{ alignItems: 'center', marginTop: 16 }}>
+        <TouchableOpacity
+          onPress={() => console.log('Action A')}
+          style={{
+            backgroundColor: Palette.accentPink,
+            paddingVertical: 12,
+            borderRadius: 10,
+            width: '70%',
+            maxWidth: 360,
+            alignItems: 'center',
+            marginBottom: 12,
+          }}>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>Action A</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => console.log('Action B')}
+          style={{
+            backgroundColor: Palette.accentBlue,
+            paddingVertical: 12,
+            borderRadius: 10,
+            width: '70%',
+            maxWidth: 360,
+            alignItems: 'center',
+          }}>
+          <Text style={{ color: '#fff', fontWeight: '700' }}>Action B</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
 
 export default function HomeScreen() {
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+      headerBackgroundColor={{ light: '#F5F5F5', dark: '#E0E0E0' }}
       headerImage={
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+          source={{ uri: 'https://nipo.pl/wp-content/uploads/2015/09/Ma%C5%82opolska-nowe-logo-poziom.jpg' }}
+          style={{ width: '100%', height: 100, marginTop: 32 }}
+          resizeMode="cover"
         />
       }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
+      <WelcomeContent />
     </ParallaxScrollView>
   );
 }
@@ -87,12 +111,5 @@ const styles = StyleSheet.create({
   stepContainer: {
     gap: 8,
     marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
   },
 });
