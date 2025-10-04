@@ -1,9 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
 export default function App() {
+  const [position, setPosition] = useState({
+    latitude: 10,
+    longitude: 10,
+    latitudeDelta: 0.0421,
+    longitudeDelta: 0.0421,
+  });
   const backend_list = [
     {
       _id:0,
@@ -18,9 +24,24 @@ export default function App() {
     coordinate={marker.coordinate}
     />
   )
+  // navigator.geolocation.getCurrentPosition(info => {
+  //   setPosition({
+  //     longitude:info.coords.longitude,
+  //     latitude:info.coords.latitude,
+  //     latitudeDelta: 0.0421,
+  //     longitudeDelta: 0.0421,
+  //   });
+  // });
   return (
     <View style={styles.container}>
-      <MapView style={styles.map}>
+      <MapView 
+      style={styles.map}
+      initialRegion={{
+        latitude:50.067575,
+        longitude:19.991951,
+       latitudeDelta: 0.0421,
+       longitudeDelta: 0.0421,}}//fxit
+      >
         {markerList}
         </MapView>
     </View>
