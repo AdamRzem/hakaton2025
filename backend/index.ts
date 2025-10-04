@@ -32,6 +32,10 @@ const appRouter = router({
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+server.listen(3000,"0.0.0.0");
+>>>>>>> Stashed changes
 =======
 server.listen(3000,"0.0.0.0");
 >>>>>>> Stashed changes
