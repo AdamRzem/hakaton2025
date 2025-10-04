@@ -6,8 +6,9 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Fonts, Palette } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { saveAuth } from './utils/auth';
-import { client } from './utils/trpcClient';
+import { trpc } from '@/utils/trpc';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQuery } from '@tanstack/react-query';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -20,12 +21,7 @@ export default function LoginPage() {
   const textColor = useThemeColor({}, 'text');
   const placeholderColor = useThemeColor({}, 'icon');
 
-  const handleLogin = () => {
-    // Quick-access: entering 'a' in either email or password (trimmed, case-insensitive)
-    // takes you directly to the main app (index).
-    const e = email.trim().toLowerCase();
-    const p = password.trim().toLowerCase();
-
+  const handleLogin = async () => {
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
@@ -35,13 +31,13 @@ export default function LoginPage() {
     // Call backend via tRPC login procedure
     (async () => {
       try {
-        const res = await client.login.query({ email, password });
+        const loggerIn = useQuery(trpc.login.queryOptions({ email, password }));
+        const res = await loggerIn.data;
         if (!res) {
           setError('Invalid credentials');
           return;
         }
-        // res is expected to be a JWT string
-        await saveAuth(res as string, email);
+        await AsyncStorage.setItem('token', res);
         router.replace('/');
       } catch (err: any) {
         console.error('Login error', err);
@@ -105,7 +101,7 @@ export default function LoginPage() {
       </View>
 
       {error ? (
-        <ThemedText style={[styles.error, { color: tint }]}> 
+        <ThemedText style={[styles.error, { color: tint }]}>
           {error}
         </ThemedText>
       ) : null}
@@ -114,7 +110,7 @@ export default function LoginPage() {
         <ThemedText style={[styles.buttonText, { fontFamily: (Fonts as any).rounded }]}>Login</ThemedText>
       </TouchableOpacity>
       <View style={styles.footerRow}>
-  <ThemedText style={[styles.smallText, { marginRight: 6 }]}>Don&apos;t have an account?</ThemedText>
+        <ThemedText style={[styles.smallText, { marginRight: 6 }]}>Don&apos;t have an account?</ThemedText>
         <Link href="/register" style={styles.loginLink}>
           <ThemedText style={[styles.smallText, { color: tint }]}>Create one</ThemedText>
         </Link>
