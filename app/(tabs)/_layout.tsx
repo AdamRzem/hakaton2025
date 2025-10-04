@@ -5,7 +5,7 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 // Tab layout shows Register and Login without the tab bar. When navigating to
 // the main app screens (index, explore, antek) their options override the
 // tabBarStyle so the tab bar becomes visible and the user can switch tabs.
@@ -13,6 +13,7 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -54,5 +55,6 @@ export default function TabLayout() {
           }}
         />
     </Tabs>
+    </ThemeProvider>
   );
 }

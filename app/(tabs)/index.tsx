@@ -1,11 +1,12 @@
 
 import { Palette } from '@/constants/theme';
 import { Image } from 'expo-image';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native';
 
 
 import { getAuth } from '@/app/utils/auth';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { ThemedView } from '@/components/themed-view';
 import React, { useEffect, useState } from 'react';
 
 function pickColor(index?: number) {
@@ -24,10 +25,11 @@ function pickColor(index?: number) {
 
 function Card({ title, body, borderColor }: { title: string; body: string; borderColor?: string }) {
   const border = borderColor ?? pickColor();
+  const isDarkTheme = useColorScheme() ==='dark';
   return (
     <View
       style={{
-        backgroundColor: '#fff',
+        backgroundColor: isDarkTheme?'#000':'#fff',
         borderRadius: 12,
         padding: 16,
         marginBottom: 16,
@@ -35,7 +37,7 @@ function Card({ title, body, borderColor }: { title: string; body: string; borde
         borderColor: border,
       }}
     >
-      <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 8, color: '#111' }}>{title}</Text>
+      <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 8, color: isDarkTheme?'#EEE':'#111' }}>{title}</Text>
       <Text style={{ fontSize: 14, color: '#555' }}>{body}</Text>
     </View>
   );
@@ -54,6 +56,7 @@ function WelcomeContent() {
       }
     })();
   }, []);
+  const isDarkTheme = useColorScheme() ==='dark';
   const cards = [
     { title: 'Card 1', body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
     { title: 'Card 2', body: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
@@ -61,7 +64,8 @@ function WelcomeContent() {
   ];
 
   return (
-    <View>
+    <ThemedView lightColor="#fff" darkColor="#000">
+      
       <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16, color: Palette.accentPink }}>
         Welcome{email ? `, ${email}` : ', user'}
       </Text>
@@ -80,7 +84,7 @@ function WelcomeContent() {
             alignItems: 'center',
             marginBottom: 12,
           }}>
-          <Text style={{ color: '#fff', fontWeight: '700' }}>Action A</Text>
+          <Text style={{ color: isDarkTheme?'#fff':'#000', fontWeight: '700' }}>Action A</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -93,22 +97,23 @@ function WelcomeContent() {
             maxWidth: 360,
             alignItems: 'center',
           }}>
-          <Text style={{ color: '#fff', fontWeight: '700' }}>Action B</Text>
+          <Text style={{ color: isDarkTheme?'#fff':'#000', fontWeight: '700' }}>Action B</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ThemedView>
   );
 }
 
 export default function HomeScreen() {
   return (
+    
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#F5F5F5', dark: '#E0E0E0' }}
+      headerBackgroundColor={{ light: '#F5F5F5', dark: '#000' }}
       headerImage={
         <Image
           source={{ uri: 'https://nipo.pl/wp-content/uploads/2015/09/Ma%C5%82opolska-nowe-logo-poziom.jpg' }}
-          style={{ width: '100%', height: 100, marginTop: 32 }}
-          resizeMode="cover"
+          style={{ width: '100%', height: 100, marginTop: 32}}
+          contentFit="cover"
         />
       }>
       <WelcomeContent />

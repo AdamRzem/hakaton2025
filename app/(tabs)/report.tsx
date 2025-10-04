@@ -34,7 +34,7 @@ export default function ReportScreen() {
   };
 
   return (
-    <ThemedView lightColor="#ffffff" darkColor="#ffffff" style={styles.screen}>
+    <ThemedView lightColor="#ffffff" darkColor="#000" style={styles.screen}>
       <View style={styles.titleCard}>
         <View style={styles.titleRow}>
           {'REPORT'.split('').map((ch, i) => (
@@ -120,7 +120,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#ffffff',
   },
 
   /* Title */
@@ -130,7 +129,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 0,
     borderWidth: 0,
-    backgroundColor: '#ffffff',
     shadowColor: '#000',
     shadowOpacity: 0.01,
     shadowOffset: { width: 0, height: 1 },
