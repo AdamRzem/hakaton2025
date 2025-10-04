@@ -13,6 +13,7 @@ export default function ReportScreen() {
   const [reportedMarker, setReportedMarker] = useState<{ latitude: number; longitude: number } | null>(null);
   const [reportedDescription, setReportedDescription] = useState('');
   const [description, setDescription] = useState('');
+  const [lineNumber, setLineNumber] = useState('');
   const theme = useColorScheme() ?? 'light';
   const placeholderColor = useThemeColor({}, 'icon');
 
@@ -29,6 +30,7 @@ export default function ReportScreen() {
       setReportedDescription(description);
       setMarker(null);
       setDescription('');
+      setLineNumber('');
       setModalVisible(true);
     }
   };
@@ -67,6 +69,14 @@ export default function ReportScreen() {
           style={styles.bottomInput}
           multiline
         />
+        <TextInput
+          value={lineNumber}
+          onChangeText={setLineNumber}
+          placeholder="Line number"
+          placeholderTextColor={placeholderColor}
+          style={styles.lineNumberInput}
+          keyboardType="numeric"
+        />
       </View>
 
       {marker && (
@@ -95,6 +105,8 @@ export default function ReportScreen() {
             </ThemedText>
             <ThemedText style={[styles.coordText, { marginTop: 8 }]}>Description:</ThemedText>
             <ThemedText style={styles.coordText}>{reportedDescription || '-'}</ThemedText>
+            <ThemedText style={[styles.coordText, { marginTop: 8 }]}>Line number:</ThemedText>
+            <ThemedText style={styles.coordText}>{lineNumber || '-'}</ThemedText>
 
             <View style={styles.modalActions}>
               <TouchableOpacity
@@ -120,6 +132,24 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     padding: 16,
+  },
+
+  lineNumberInput: {
+    width: '95%',
+    minHeight: 40,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e6e6e6',
+    marginTop: 8,
+    marginRight: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 2,
   },
 
   /* Title */
