@@ -4,7 +4,9 @@ import { Image } from 'expo-image';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 
+import { getAuth } from '@/app/utils/auth';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
+import React, { useEffect, useState } from 'react';
 
 function pickColor(index?: number) {
   const colors = [
@@ -40,6 +42,18 @@ function Card({ title, body, borderColor }: { title: string; body: string; borde
 }
 
 function WelcomeContent() {
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const a = await getAuth();
+        setEmail(a.email);
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }, []);
   const cards = [
     { title: 'Card 1', body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
     { title: 'Card 2', body: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
@@ -49,7 +63,7 @@ function WelcomeContent() {
   return (
     <View>
       <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16, color: Palette.accentPink }}>
-        Welcome, user
+        Welcome{email ? `, ${email}` : ', user'}
       </Text>
       {cards.map((c, idx) => (
         <Card key={idx} title={c.title} body={c.body} borderColor={pickColor(idx)} />

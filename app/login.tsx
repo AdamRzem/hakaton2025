@@ -6,6 +6,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Fonts, Palette } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { saveAuth } from './utils/auth';
+import { client } from './utils/trpcClient';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -23,17 +25,29 @@ export default function LoginPage() {
     // takes you directly to the main app (index).
     const e = email.trim().toLowerCase();
     const p = password.trim().toLowerCase();
-    if (e === 'a' || p === 'a') {
-      router.replace('/');
-      return;
-    }
 
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
     }
+
     setError('');
-    alert('Login submitted!');
+    // Call backend via tRPC login procedure
+    (async () => {
+      try {
+        const res = await client.login.query({ email, password });
+        if (!res) {
+          setError('Invalid credentials');
+          return;
+        }
+        // res is expected to be a JWT string
+        await saveAuth(res as string, email);
+        router.replace('/');
+      } catch (err: any) {
+        console.error('Login error', err);
+        setError(err?.message ?? 'Login failed');
+      }
+    })();
   };
 
   const title = 'LOGIN';

@@ -1,3 +1,5 @@
+import type { AppRouter } from '@/backend/index';
+import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
@@ -6,6 +8,14 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Fonts, Palette } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+
+const client = createTRPCProxyClient<AppRouter>({
+  links: [
+    httpBatchLink({
+      url: 'http://192.168.0.234:3000',
+    }),
+  ],
+});
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -19,13 +29,6 @@ export default function RegisterPage() {
   const placeholderColor = useThemeColor({}, 'icon');
 
   const handleRegister = () => {
-    // Quick-access: if both passwords are exactly 'a' and email is 'a' (or empty),
-    // treat as quick login to the lite app for testing.
-    if ((password === 'a' && confirmPassword === 'a') && (email === 'a' || email === '')) {
-      // navigate to main index (root path)
-      router.replace('/');
-      return;
-    }
 
     if (!email || !password || !confirmPassword) {
       setError('Please fill out all fields.');
@@ -35,7 +38,10 @@ export default function RegisterPage() {
       setError('Passwords do not match.');
       return;
     }
+
     setError('');
+    const token = client.register.mutate({ email, password });
+    console.log(token);
     alert('Registration submitted!');
   };
 
