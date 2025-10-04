@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
@@ -18,11 +19,14 @@ export default function App() {
     />
   )
   return (
+    <>
     <View style={styles.container}>
       <MapView style={styles.map}>
         {markerList}
         </MapView>
     </View>
+      <Button onPress={add_marker} title="➕ Add marker📌"/>
+    </>
   );
 }
 
