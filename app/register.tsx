@@ -1,5 +1,3 @@
-import type { AppRouter } from '@/backend/index';
-import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
@@ -8,14 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Fonts, Palette } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-
-const client = createTRPCProxyClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      url: 'http://192.168.0.234:3000',
-    }),
-  ],
-});
+import { client } from './utils/trpcClient';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
