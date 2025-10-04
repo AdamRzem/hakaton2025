@@ -31,6 +31,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="antek"
+        options={{
+          title: 'Maps',
+          tabBarIcon: ({ color }) => <IconSymbol size={14} name="camera" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="graph"
         options={{
           title: 'Graph',
