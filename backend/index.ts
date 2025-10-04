@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import argon from "argon2";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
@@ -46,7 +47,11 @@ const appRouter = router({
         return db.report.findMany()
     })
 });
+const server = createHTTPServer({
+    router: appRouter,
+});
 
+server.listen(3000);
 // Export type router type signature,
 // NOT the router itself.
 export type AppRouter = typeof appRouter;
