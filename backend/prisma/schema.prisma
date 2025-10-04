@@ -26,8 +26,8 @@ model User{
 
 model Report{
   reportId String @id @default(cuid())
-  userId String
-  user User @relation(fields: [userId],references: [userId])
+  userId String?
+  user User? @relation(fields: [userId],references: [userId])
   date DateTime
   location String
   createdAt DateTime @default(now())
