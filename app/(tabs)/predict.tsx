@@ -121,7 +121,7 @@ export default function PredictionsScreen() {
                       styles.progressBarBackground,
                       {
                         // Higher-contrast neutral track depending on theme
-                        backgroundColor: isDark ? '#E2E2E2' : '#343434', 
+                        backgroundColor: isDark ? '#E2E2E2' : '#343434',
                       },
                     ]}
                   >
@@ -134,7 +134,7 @@ export default function PredictionsScreen() {
                           // Ensure tiny non-zero percentages are still visible
                           backgroundColor: color,
                           // Add subtle shadow / elevation-like effect for contrast (iOS shadow props are ignored on Android but harmless)
-                          
+
                         },
                       ]}
                     />
