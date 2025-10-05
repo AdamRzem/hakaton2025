@@ -1,9 +1,10 @@
 
 import { trpc } from '@/utils/trpc';
-import { useQuery } from '@tanstack/react-query';
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+
+import { useQuery } from '@tanstack/react-query';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
 export default function App() {
@@ -49,24 +50,19 @@ export default function App() {
         const locObj: any = r.location;
         coord = { latitude: Number(locObj.latitude) || 0, longitude: Number(locObj.longitude) || 0 };
       }
-    } catch (e) {
-      // ignore parse errors
-    }
-    return {
-      id: r.reportId ?? Math.random().toString(),
-      description: r.description ?? 'Report',
-      coordinate: coord,
-    };
-  })
+      return {
+        id: r.reportId ?? Math.random().toString(),
+        description: r.description ?? 'Report',
+        line: r.line ?? r.lineNumber ?? r.lineName ?? '',
+        coordinate: coord,
+      };
+    })
     .filter((m) => m.coordinate.latitude !== 0 || m.coordinate.longitude !== 0);
 
   // Debugging
   console.log('maps-demo reports:', reports);
 
-  const markerList = backend_list.map((marker) => (
-    // render same Marker as ReportScreen (default pin)
-    <Marker key={marker.id} coordinate={marker.coordinate} title={marker.description} description={marker.description} />
-  ));
+  const [selected, setSelected] = useState<null | { id: string; description: string; line: string; coordinate: { latitude: number; longitude: number } }>(null);
 
   const mapRef = useRef<MapView | null>(null);
 
@@ -121,12 +117,25 @@ export default function App() {
           />
         )}
       </MapView>
+
       <View style={styles.overlay} pointerEvents="none">
         <Text style={styles.overlayText}>Reports: {reports.length}</Text>
         {!isLoading && reports.length === 0 && <Text style={styles.overlayText}>No reports found</Text>}
         {permDenied && <Text style={styles.overlayText}>Location permission denied</Text>}
         {isLoading && <Text style={styles.overlayText}>Loading...</Text>}
       </View>
+
+      <Modal visible={!!selected} transparent animationType="fade" onRequestClose={() => setSelected(null)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.calloutLine}>Line: {selected?.line || '—'}</Text>
+            <Text style={styles.calloutDesc}>{selected?.description}</Text>
+            <Pressable style={styles.closeButton} onPress={() => setSelected(null)}>
+              <Text style={styles.closeText}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -150,5 +159,41 @@ const styles = StyleSheet.create({
   overlayText: {
     color: '#fff',
     fontSize: 12,
+  },
+  calloutContainer: {
+    maxWidth: 220,
+  },
+  calloutLine: {
+    fontWeight: '600',
+    marginBottom: 8,
+    fontSize: 16,
+  },
+  calloutDesc: {
+    color: '#333',
+    marginBottom: 12,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 16,
+    elevation: 6,
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  closeText: {
+    color: '#007AFF',
+    fontWeight: '600',
   },
 });
