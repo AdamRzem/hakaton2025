@@ -71,7 +71,7 @@ app.post("/api/v1/addDelay", express.json(), async (req, res) => {
     }
     const body = z.object({ lineNumber: z.number(), delayMinutes: z.number(), reason: z.string().min(5).max(500), date: z.date(), location: z.string() }).safeParse(req.body);
     if (!body.success) {
-        res.status(400).json({ error: "Invalid request body", details: body.error.errors });
+        res.status(400).json({ error: "Invalid request body", details: body.error });
         return;
     }
     await db.report.create({ data: { lineNumber: body.data.lineNumber, date: body.data.date.toISOString(), location: body.data.location, description: body.data.reason } });
