@@ -6,7 +6,9 @@ import { StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedView } from '@/components/themed-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
+import { client } from '../utils/trpcClient';
 
 function pickColor(index?: number) {
   const colors = [
@@ -54,11 +56,17 @@ function WelcomeContent() {
     })()
   }, []);
   const isDarkTheme = useColorScheme() ==='dark';
-  const cards = [
-    { title: 'Card 1', body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
-    { title: 'Card 2', body: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
-    { title: 'Card 3', body: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.' },
-  ];
+  const { data: reports, isLoading, error } = useQuery<any[], Error>({
+    queryKey: ['reports'],
+    queryFn: () => client.getReports.query(),
+    refetchInterval: 60_000, // refetch every minute
+    refetchOnWindowFocus: true,
+  });
+
+  const cards = (reports ?? []).map((r: any) : { title: string; body: string } => ({
+    title: `Report ${r.reportId}`,
+    body: `Location: ${r.location}\nDate: ${r.date}\n${r.description ?? ''}`,
+  }));
 
   return (
     <ThemedView lightColor="#fff" darkColor="#000">
@@ -66,9 +74,15 @@ function WelcomeContent() {
       <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 16, color: Palette.accentPink }}>
         Welcome {name}
       </Text>
-      {cards.map((c, idx) => (
-        <Card key={idx} title={c.title} body={c.body} borderColor={pickColor(idx)} />
-      ))}
+      {isLoading ? (
+        <Text>Loading reports...</Text>
+      ) : error ? (
+        <Text>Error loading reports</Text>
+      ) : (
+        cards.map((c, idx) => (
+          <Card key={idx} title={c.title} body={c.body} borderColor={pickColor(idx)} />
+        ))
+      )}
       <View style={{ alignItems: 'center', marginTop: 16 }}>
         <TouchableOpacity
           onPress={() => console.log('Action A')}
