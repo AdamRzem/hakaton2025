@@ -1,26 +1,38 @@
 
+import { trpc } from '@/utils/trpc';
 import { useQuery } from '@tanstack/react-query';
-import React, { useEffect, useRef } from 'react';
+import * as Location from 'expo-location';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { client } from '../app/utils/trpcClient';
 
 export default function App() {
-  const { data: reports, isLoading } = useQuery<any[], Error>({
-    queryKey: ['maps-reports'],
-    queryFn: () => client.getReports.query(),
-    refetchInterval: 60_000,
-  });
+  const { data: reports = [], isLoading } = useQuery(trpc.getReports.queryOptions());
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [permDenied, setPermDenied] = useState(false);
 
-  const position = {
-    latitude: 50.067575,
-    longitude: 19.991951,
-    latitudeDelta: 0.0421,
-    longitudeDelta: 0.0421,
-  };
+  // default fallback (Kraków coordinate you had)
+  const fallbackRegion = { latitude: 50.067575, longitude: 19.991951, latitudeDelta: 0.0421, longitudeDelta: 0.0421 };
 
-  const backend_list = (reports ?? [])
-    .map((r) => {
+  // ask for location & fetch
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          setPermDenied(true);
+          return;
+        }
+        const loc = await Location.getCurrentPositionAsync({});
+        setUserLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+      } catch (e) {
+        setPermDenied(true);
+      }
+    })();
+  }, []);
+
+  const backend_list = reports
+  .map((r: any) => {
     // `location` may be stored as "lat,lng" (from report.tsx) or JSON
     let coord = { latitude: 0, longitude: 0 };
     try {
@@ -34,7 +46,8 @@ export default function App() {
           coord = { latitude: Number(parsed.latitude) || 0, longitude: Number(parsed.longitude) || 0 };
         }
       } else if (typeof r.location === 'object' && r.location !== null) {
-        coord = { latitude: Number(r.location.latitude) || 0, longitude: Number(r.location.longitude) || 0 };
+        const locObj: any = r.location;
+        coord = { latitude: Number(locObj.latitude) || 0, longitude: Number(locObj.longitude) || 0 };
       }
     } catch (e) {
       // ignore parse errors
@@ -60,12 +73,13 @@ export default function App() {
   // auto-fit map to markers
   useEffect(() => {
     const coords = backend_list.map((m) => m.coordinate).filter((c) => c.latitude && c.longitude);
+    if (userLocation) coords.push(userLocation);
     if (coords.length > 0 && mapRef.current) {
       try {
         mapRef.current.fitToCoordinates(coords, { edgePadding: { top: 50, right: 50, bottom: 50, left: 50 }, animated: true });
       } catch {}
     }
-  }, [reports]);
+  }, [reports, userLocation]);
   // Static marker in the center of Kraków (Main Market Square)
   // const staticMarker = (
   //   <Marker
@@ -84,15 +98,34 @@ export default function App() {
   //     longitudeDelta: 0.0421,
   //   });
   // });
+  const initialRegion = userLocation
+    ? { latitude: userLocation.latitude, longitude: userLocation.longitude, latitudeDelta: 0.02, longitudeDelta: 0.02 }
+    : fallbackRegion;
+
   return (
     <View style={styles.container}>
-      <MapView ref={(r) => { mapRef.current = r; }} style={styles.map} initialRegion={position}>
+      <MapView
+        ref={(r) => { mapRef.current = r; }}
+        style={styles.map}
+        initialRegion={initialRegion}
+        showsUserLocation={!!userLocation}
+        showsMyLocationButton
+      >
         {markerList}
-        {/* {staticMarker} */}
+        {userLocation && (
+          <Marker
+            key="user-location"
+            coordinate={userLocation}
+            title="You are here"
+            pinColor="magenta"
+          />
+        )}
       </MapView>
       <View style={styles.overlay} pointerEvents="none">
-        <Text style={styles.overlayText}>Reports: {(reports ?? []).length}</Text>
-        {!isLoading && (reports ?? []).length === 0 && <Text style={styles.overlayText}>No reports found</Text>}
+        <Text style={styles.overlayText}>Reports: {reports.length}</Text>
+        {!isLoading && reports.length === 0 && <Text style={styles.overlayText}>No reports found</Text>}
+        {permDenied && <Text style={styles.overlayText}>Location permission denied</Text>}
+        {isLoading && <Text style={styles.overlayText}>Loading...</Text>}
       </View>
     </View>
   );
