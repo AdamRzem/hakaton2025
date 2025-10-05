@@ -121,11 +121,7 @@ export default function HomeScreen() {
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#F5F5F5', dark: '#000' }}
       headerImage={
-        <Image
-          source={{ uri: 'https://nipo.pl/wp-content/uploads/2015/09/Ma%C5%82opolska-nowe-logo-poziom.jpg' }}
-          style={{ width: '100%', height: 100, marginTop: 32}}
-          contentFit="cover"
-        />
+        <Image source={require('../../assets/images/icon (2).png')} style={{ width: '100%', height: 100, marginTop: 32 }} contentFit="cover" />
       }>
       <WelcomeContent />
     </ParallaxScrollView>
