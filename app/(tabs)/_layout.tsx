@@ -50,7 +50,7 @@ export default function TabLayout() {
           name="report"
           options={{
             title: 'Report',
-            tabBarIcon: ({ color }) => <IconSymbol size={14} name="map.fill" color={color} />,
+            tabBarIcon: ({ color }) => <IconSymbol size={14} name="plus" color={color} />,
             tabBarStyle: { display: 'flex' },
           }}
         />
