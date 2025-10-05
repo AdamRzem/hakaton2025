@@ -83,7 +83,8 @@ export default function ReportScreen() {
           placeholder="Describe the problem..."
           placeholderTextColor={placeholderColor}
           style={styles.bottomInput}
-          multiline
+          returnKeyType='done'
+
         />
         <TextInput
           value={lineNumber}
@@ -92,6 +93,7 @@ export default function ReportScreen() {
           placeholderTextColor={placeholderColor}
           style={styles.lineNumberInput}
           keyboardType="numeric"
+          returnKeyType='done'
         />
       </View>
 
