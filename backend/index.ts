@@ -46,18 +46,18 @@ const appRouter = router({
             throw new TRPCError({ message: "not authorized", code: "FORBIDDEN" });
 
         }
-        
-        await db.report.create({ data: { location: opts.input.location, userId: userId,date: opts.input.date, lineNumber: opts.input.lineNumber } })
+
+        await db.report.create({ data: { location: opts.input.location, userId: userId, date: opts.input.date, lineNumber: opts.input.lineNumber } })
     }),
     getReports: publicProcedure.query(async (opts) => {
-        return db.report.findMany()
+        return db.report.findMany({ include: { user: true } })
     })
 });
 const server = createHTTPServer({
     router: appRouter,
 });
 
-server.listen(3000,"0.0.0.0");
+server.listen(3000, "0.0.0.0");
 
 // Export type router type signature,
 // NOT the router itself.
