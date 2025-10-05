@@ -29,8 +29,10 @@ const appRouter = router({
 
 
     }),
-    report: publicProcedure.input(z.object({ toke: z.string(), location: z.string(), date: z.date(), lineNumber: z.number().optional() })).mutation(async (opts) => {
+    report: publicProcedure.input(z.object({ toke: z.string(), location: z.string(), date: z.string(), lineNumber: z.number().optional() })).mutation(async (opts) => {
         let userId = "";
+        console.log(typeof opts.input.date);
+        console.log(opts.input.date);
         try {
             const out = jwt.verify(opts.input.toke, SUPER_SECRET_KEY);
             if (typeof out !== "string") {
@@ -44,7 +46,8 @@ const appRouter = router({
             throw new TRPCError({ message: "not authorized", code: "FORBIDDEN" });
 
         }
-        await db.report.create({ data: { date: opts.input.date, location: opts.input.location, userId: userId, lineNumber: opts.input.lineNumber } })
+        
+        await db.report.create({ data: { location: opts.input.location, userId: userId,date: opts.input.date, lineNumber: opts.input.lineNumber } })
     }),
     getReports: publicProcedure.query(async (opts) => {
         return db.report.findMany()

@@ -28,8 +28,8 @@ model Report{
   reportId String @id @default(cuid())
   userId String?
   user User? @relation(fields: [userId],references: [userId])
-  date DateTime
   location String
+  date String
   lineNumber Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
