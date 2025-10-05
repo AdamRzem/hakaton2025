@@ -1,4 +1,5 @@
 
+import { Text } from '@react-navigation/elements';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
@@ -22,8 +23,10 @@ export default function App() {
     key={marker._id}
     description={marker.description}
     coordinate={marker.coordinate}
-    title='🚧'
-    />
+    title='Roadblock'
+    >
+      <Text style={{fontSize:30}}>🚧</Text>
+    </Marker>
   )
   // navigator.geolocation.getCurrentPosition(info => {
   //   setPosition({
