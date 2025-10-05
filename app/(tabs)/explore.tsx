@@ -69,6 +69,7 @@ export default function TabTwoScreen() {
               </View>
               <Text style={styles.metaText}>Source: {authorDisplay}</Text>
               <Text style={styles.metaText}>Line: {report.lineNumber ?? 'not set'}</Text>
+              <Text style={styles.metaText}>Description: {report.description || 'No description'}</Text>
               <Link
                 href="/(tabs)/antek"
                 style={[

@@ -29,7 +29,7 @@ const appRouter = router({
 
 
     }),
-    report: publicProcedure.input(z.object({ toke: z.string(), location: z.string(), date: z.string(), lineNumber: z.number().optional() })).mutation(async (opts) => {
+    report: publicProcedure.input(z.object({ toke: z.string(), location: z.string(), date: z.string(), lineNumber: z.number().optional(), description: z.string() })).mutation(async (opts) => {
         let userId = "";
         console.log(typeof opts.input.date);
         console.log(opts.input.date);
@@ -47,7 +47,7 @@ const appRouter = router({
 
         }
 
-        await db.report.create({ data: { location: opts.input.location, userId: userId, date: opts.input.date, lineNumber: opts.input.lineNumber } })
+        await db.report.create({ data: { location: opts.input.location, userId: userId, date: opts.input.date, lineNumber: opts.input.lineNumber, description: opts.input.description } })
     }),
     getReports: publicProcedure.query(async (opts) => {
         return db.report.findMany({ include: { user: true } })
