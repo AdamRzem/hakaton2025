@@ -1,7 +1,6 @@
-
 import { useQuery } from '@tanstack/react-query';
-import React, { useEffect, useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { client } from '../app/utils/trpcClient';
 
@@ -21,39 +20,36 @@ export default function App() {
 
   const backend_list = (reports ?? [])
     .map((r) => {
-    // `location` may be stored as "lat,lng" (from report.tsx) or JSON
-    let coord = { latitude: 0, longitude: 0 };
-    try {
-      if (typeof r.location === 'string') {
-        const s = r.location.trim();
-        if (s.includes(',')) {
-          const [latS, lngS] = s.split(',');
-          coord = { latitude: Number(latS) || 0, longitude: Number(lngS) || 0 };
-        } else {
-          const parsed = JSON.parse(s);
-          coord = { latitude: Number(parsed.latitude) || 0, longitude: Number(parsed.longitude) || 0 };
+      let coord = { latitude: 0, longitude: 0 };
+      try {
+        if (typeof r.location === 'string') {
+          const s = r.location.trim();
+          if (s.includes(',')) {
+            const [latS, lngS] = s.split(',');
+            coord = { latitude: Number(latS) || 0, longitude: Number(lngS) || 0 };
+          } else {
+            const parsed = JSON.parse(s);
+            coord = { latitude: Number(parsed.latitude) || 0, longitude: Number(parsed.longitude) || 0 };
+          }
+        } else if (typeof r.location === 'object' && r.location !== null) {
+          coord = { latitude: Number(r.location.latitude) || 0, longitude: Number(r.location.longitude) || 0 };
         }
-      } else if (typeof r.location === 'object' && r.location !== null) {
-        coord = { latitude: Number(r.location.latitude) || 0, longitude: Number(r.location.longitude) || 0 };
+      } catch (e) {
+        // ignore parse errors
       }
-    } catch (e) {
-      // ignore parse errors
-    }
-    return {
-      id: r.reportId ?? Math.random().toString(),
-      description: r.description ?? 'Report',
-      coordinate: coord,
-    };
-  })
+      return {
+        id: r.reportId ?? Math.random().toString(),
+        description: r.description ?? 'Report',
+        line: r.line ?? r.lineNumber ?? r.lineName ?? '',
+        coordinate: coord,
+      };
+    })
     .filter((m) => m.coordinate.latitude !== 0 || m.coordinate.longitude !== 0);
 
   // Debugging
   console.log('maps-demo reports:', reports);
 
-  const markerList = backend_list.map((marker) => (
-    // render same Marker as ReportScreen (default pin)
-    <Marker key={marker.id} coordinate={marker.coordinate} title={marker.description} description={marker.description} />
-  ));
+  const [selected, setSelected] = useState<null | { id: string; description: string; line: string; coordinate: { latitude: number; longitude: number } }>(null);
 
   const mapRef = useRef<MapView | null>(null);
 
@@ -66,34 +62,35 @@ export default function App() {
       } catch {}
     }
   }, [reports]);
-  // Static marker in the center of Kraków (Main Market Square)
-  // const staticMarker = (
-  //   <Marker
-  //     key="static-krakow"
-  //     coordinate={{ latitude: 50.06143, longitude: 19.93658 }}
-  //     title="Kraków - Main Market"
-  //     description="Static marker for testing"
-  //     pinColor="blue"
-  //   />
-  // );
-  // navigator.geolocation.getCurrentPosition(info => {
-  //   setPosition({
-  //     longitude:info.coords.longitude,
-  //     latitude:info.coords.latitude,
-  //     latitudeDelta: 0.0421,
-  //     longitudeDelta: 0.0421,
-  //   });
-  // });
+
   return (
     <View style={styles.container}>
       <MapView ref={(r) => { mapRef.current = r; }} style={styles.map} initialRegion={position}>
-        {markerList}
-        {/* {staticMarker} */}
+        {backend_list.map((marker) => (
+          <Marker
+            key={marker.id}
+            coordinate={marker.coordinate}
+            onPress={() => setSelected(marker)}
+          />
+        ))}
       </MapView>
+
       <View style={styles.overlay} pointerEvents="none">
         <Text style={styles.overlayText}>Reports: {(reports ?? []).length}</Text>
         {!isLoading && (reports ?? []).length === 0 && <Text style={styles.overlayText}>No reports found</Text>}
       </View>
+
+      <Modal visible={!!selected} transparent animationType="fade" onRequestClose={() => setSelected(null)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.calloutLine}>Line: {selected?.line || '—'}</Text>
+            <Text style={styles.calloutDesc}>{selected?.description}</Text>
+            <Pressable style={styles.closeButton} onPress={() => setSelected(null)}>
+              <Text style={styles.closeText}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -117,5 +114,41 @@ const styles = StyleSheet.create({
   overlayText: {
     color: '#fff',
     fontSize: 12,
+  },
+  calloutContainer: {
+    maxWidth: 220,
+  },
+  calloutLine: {
+    fontWeight: '600',
+    marginBottom: 8,
+    fontSize: 16,
+  },
+  calloutDesc: {
+    color: '#333',
+    marginBottom: 12,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 16,
+    elevation: 6,
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  closeText: {
+    color: '#007AFF',
+    fontWeight: '600',
   },
 });
