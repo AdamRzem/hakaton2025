@@ -47,7 +47,7 @@ const appRouter = router({
 
         }
         
-        await db.report.create({ data: { location: opts.input.location, userId: userId,date: opts.input.date, lineNumber: opts.input.lineNumber } })
+        await db.report.create({ data: { location: opts.input.location, userId: userId,date: opts.input.date, lineNumber: opts.input.lineNumber} })
     }),
     getReports: publicProcedure.query(async (opts) => {
         return db.report.findMany()
