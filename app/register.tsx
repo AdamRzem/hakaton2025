@@ -10,14 +10,6 @@ import { trpc } from '@/utils/trpc';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation } from '@tanstack/react-query';
 
-// const client = createTRPCProxyClient<AppRouter>({
-//   links: [
-//     httpBatchLink({
-//       url: 'http://192.168.0.234:3000',
-//     }),
-//   ],
-// });
-
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

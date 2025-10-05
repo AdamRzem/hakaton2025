@@ -6,9 +6,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Fonts, Palette } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { trpc } from '@/utils/trpc';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useQuery } from '@tanstack/react-query';
+import { client } from './utils/trpcClient';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -20,8 +19,10 @@ export default function LoginPage() {
   const tint = useThemeColor({}, 'tint');
   const textColor = useThemeColor({}, 'text');
   const placeholderColor = useThemeColor({}, 'icon');
-
+  
+  
   const handleLogin = async () => {
+    
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
@@ -29,22 +30,19 @@ export default function LoginPage() {
 
     setError('');
     // Call backend via tRPC login procedure
-    (async () => {
-      try {
-        const loggerIn = useQuery(trpc.login.queryOptions({ email, password }));
-        const res = await loggerIn.data;
+       try {
+        const res = await client.login.query({ email, password });
         if (!res) {
           setError('Invalid credentials');
-          return;
+           return;
+         }
+          await AsyncStorage.setItem('token', res);
+          router.replace('/');
+        } catch (err: any) {
+          console.error('Login error', err);
+          setError(err?.message ?? 'Login failed');
         }
-        await AsyncStorage.setItem('token', res);
-        router.replace('/');
-      } catch (err: any) {
-        console.error('Login error', err);
-        setError(err?.message ?? 'Login failed');
-      }
-    })();
-  };
+   };
 
   const title = 'LOGIN';
   const titleColors = [Palette.accentPink, Palette.accentGreen, Palette.accentYellow, Palette.accentBlue, Palette.accentPurple];

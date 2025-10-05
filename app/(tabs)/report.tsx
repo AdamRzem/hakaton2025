@@ -3,6 +3,9 @@ import { ThemedView } from '@/components/themed-view';
 import { Colors, Fonts, Palette } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useThemeColor } from '@/hooks/use-theme-color';
+import { trpc } from '@/utils/trpc';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { MapPressEvent, Marker } from 'react-native-maps';
@@ -16,13 +19,14 @@ export default function ReportScreen() {
   const [lineNumber, setLineNumber] = useState('');
   const theme = useColorScheme() ?? 'light';
   const placeholderColor = useThemeColor({}, 'icon');
-
+  const reporter = useMutation(trpc.report.mutationOptions());
   const handleMapPress = (e: MapPressEvent) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;
     setMarker({ latitude, longitude });
   };
 
-  const handleReport = () => {
+  const handleReport = async () => {
+    const toke = await AsyncStorage.getItem('token');
     // Save the marker and description for the report modal, then remove them
     // from the form/UI so the marker/button/input disappear immediately.
     if (marker) {
@@ -32,6 +36,12 @@ export default function ReportScreen() {
       setDescription('');
       setLineNumber('');
       setModalVisible(true);
+      if (!toke) {
+        return;
+      }
+      const d = new Date().toString();
+      console.log(d);
+      const token = await reporter.mutateAsync({ toke: toke.toString() ,location: `${marker.latitude},${marker.longitude}`,date: d, lineNumber: lineNumber ? parseInt(lineNumber, 10) : undefined });
     }
   };
 
