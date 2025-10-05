@@ -33,22 +33,25 @@ export default function App() {
   }, []);
 
   const backend_list = reports
-  .map((r: any) => {
-    // `location` may be stored as "lat,lng" (from report.tsx) or JSON
-    let coord = { latitude: 0, longitude: 0 };
-    try {
-      if (typeof r.location === 'string') {
-        const s = r.location.trim();
-        if (s.includes(',')) {
-          const [latS, lngS] = s.split(',');
-          coord = { latitude: Number(latS) || 0, longitude: Number(lngS) || 0 };
-        } else {
-          const parsed = JSON.parse(s);
-          coord = { latitude: Number(parsed.latitude) || 0, longitude: Number(parsed.longitude) || 0 };
+    .map((r: any) => {
+      // `location` may be stored as "lat,lng" (from report.tsx) or JSON
+      let coord = { latitude: 0, longitude: 0 };
+      try {
+        if (typeof r.location === 'string') {
+          const s = r.location.trim();
+          if (s.includes(',')) {
+            const [latS, lngS] = s.split(',');
+            coord = { latitude: Number(latS) || 0, longitude: Number(lngS) || 0 };
+          } else {
+            const parsed = JSON.parse(s);
+            coord = { latitude: Number(parsed.latitude) || 0, longitude: Number(parsed.longitude) || 0 };
+          }
+        } else if (typeof r.location === 'object' && r.location !== null) {
+          const locObj: any = r.location;
+          coord = { latitude: Number(locObj.latitude) || 0, longitude: Number(locObj.longitude) || 0 };
         }
-      } else if (typeof r.location === 'object' && r.location !== null) {
-        const locObj: any = r.location;
-        coord = { latitude: Number(locObj.latitude) || 0, longitude: Number(locObj.longitude) || 0 };
+      } catch (e) {
+        // ignore parse errors; coord stays (0,0)
       }
       return {
         id: r.reportId ?? Math.random().toString(),
@@ -59,9 +62,18 @@ export default function App() {
     })
     .filter((m) => m.coordinate.latitude !== 0 || m.coordinate.longitude !== 0);
 
+  const markerList = backend_list.map((m) => (
+    <Marker
+      key={m.id}
+      coordinate={m.coordinate}
+      title={m.description}
+      description={m.line ? `Line: ${m.line}` : undefined}
+      onPress={() => setSelected(m)}
+    />
+  ));
+
   // Debugging
   console.log('maps-demo reports:', reports);
-
   const [selected, setSelected] = useState<null | { id: string; description: string; line: string; coordinate: { latitude: number; longitude: number } }>(null);
 
   const mapRef = useRef<MapView | null>(null);
@@ -73,7 +85,7 @@ export default function App() {
     if (coords.length > 0 && mapRef.current) {
       try {
         mapRef.current.fitToCoordinates(coords, { edgePadding: { top: 50, right: 50, bottom: 50, left: 50 }, animated: true });
-      } catch {}
+      } catch { }
     }
   }, [reports, userLocation]);
   // Static marker in the center of Kraków (Main Market Square)
