@@ -22,6 +22,7 @@ export default function App() {
     key={marker._id}
     description={marker.description}
     coordinate={marker.coordinate}
+    title='🚧'
     />
   )
   // navigator.geolocation.getCurrentPosition(info => {
