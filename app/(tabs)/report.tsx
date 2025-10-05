@@ -41,7 +41,13 @@ export default function ReportScreen() {
       }
       const d = new Date().toString();
       console.log(d);
-      const token = await reporter.mutateAsync({ toke: toke.toString() ,location: `${marker.latitude},${marker.longitude}`,date: d, lineNumber: lineNumber ? parseInt(lineNumber, 10) : undefined });
+      const token = await reporter.mutateAsync({
+        toke: toke.toString(),
+        location: `${marker.latitude},${marker.longitude}`,
+        date: d,
+        lineNumber: lineNumber ? parseInt(lineNumber, 10) : undefined,
+        description: description || "no description"
+      });
     }
   };
 
