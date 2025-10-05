@@ -14,14 +14,14 @@ export default function TabLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: { display: 'none' },
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        tabBarButton: HapticTab,
-      }}>
-      {/* Main app screens: show the tab bar */}
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: { display: 'none' },
+          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          tabBarButton: HapticTab,
+        }}>
+        {/* Main app screens: show the tab bar */}
         <Tabs.Screen
           name="index"
           options={{
@@ -54,7 +54,15 @@ export default function TabLayout() {
             tabBarStyle: { display: 'flex' },
           }}
         />
-    </Tabs>
+        <Tabs.Screen
+          name="predict"
+          options={{
+            title: 'Predict',
+            tabBarIcon: ({ color }) => <IconSymbol size={14} name="triangle.fill" color={color} />,
+            tabBarStyle: { display: 'flex' },
+          }}
+        />
+      </Tabs>
     </ThemeProvider>
   );
 }

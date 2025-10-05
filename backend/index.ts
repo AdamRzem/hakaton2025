@@ -92,7 +92,7 @@ const appRouter = router({
         const reportId = opts.input.reportId;
         const existingUp = await db.upvoted.findUnique({ where: { userId_reportId: { userId, reportId } } }).catch(() => null);
         const existingDown = await db.downvoted.findUnique({ where: { userId_reportId: { userId, reportId } } }).catch(() => null);
-    let status: 'removed' | 'upvoted' | 'switched' = 'removed';
+        let status: 'removed' | 'upvoted' | 'switched' = 'removed';
         await db.$transaction(async (tx) => {
             if (existingUp) {
                 await tx.upvoted.delete({ where: { userId_reportId: { userId, reportId } } });
@@ -129,7 +129,7 @@ const appRouter = router({
         const reportId = opts.input.reportId;
         const existingDown = await db.downvoted.findUnique({ where: { userId_reportId: { userId, reportId } } }).catch(() => null);
         const existingUp = await db.upvoted.findUnique({ where: { userId_reportId: { userId, reportId } } }).catch(() => null);
-    let status: 'removed' | 'downvoted' | 'switched' = 'removed';
+        let status: 'removed' | 'downvoted' | 'switched' = 'removed';
         await db.$transaction(async (tx) => {
             if (existingDown) {
                 await tx.downvoted.delete({ where: { userId_reportId: { userId, reportId } } });
@@ -168,11 +168,21 @@ const appRouter = router({
 
         }
         const user = await db.user.findUnique({ where: { userId }, include: { reports: true } });
+        let score = 0;
+        if (user) {
+            const [upCount, downCount] = await Promise.all([
+                db.upvoted.count({ where: { report: { userId } } }),
+                db.downvoted.count({ where: { report: { userId } } }),
+            ]);
+            score = upCount - downCount;
+        }
         if (!user) {
             throw new TRPCError({ message: "not authorized", code: "FORBIDDEN" });
         }
-        return user;
-    })
+        return { ...user, score };
+    }),
+
+
 });
 
 const app = express();

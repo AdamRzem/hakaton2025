@@ -1,6 +1,6 @@
 // ...existing code...
 import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedView } from '@/components/themed-view';
+// Removed inner ThemedView usage to avoid covering the tab bar; outer Parallax already provides themed background
 import { Palette } from '@/constants/theme';
 import { trpc } from '@/utils/trpc';
 import { useQuery } from '@tanstack/react-query';
@@ -80,12 +80,10 @@ export default function PredictionsScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#F5F5F5', dark: '#000' }}
-      headerImage={null}
+      headerImage={<View />}
     >
-      <ThemedView
-        lightColor="#fff"
-        darkColor="#000"
-        style={[styles.container, { paddingBottom: 16 + Math.max(0, insets.bottom) }]}
+      <View
+        style={[styles.container, { paddingBottom: 32 + Math.max(0, insets.bottom) }]}
       >
         <View style={styles.headerRow}>
           <Text style={[styles.screenTitle, { color: Palette.accentPink }]}>Predicted Delays — Next Week (by day)</Text>
@@ -118,15 +116,35 @@ export default function PredictionsScreen() {
                     <Text style={styles.smallText}>{d.count} reports</Text>
                     <Text style={[styles.smallText, { marginLeft: 8 }]}>{d.percent}%</Text>
                   </View>
-                  <View style={styles.progressBarBackground}>
-                    <View style={[styles.progressBarFill, { width: `${d.percent}%`, backgroundColor: color }]} />
+                  <View
+                    style={[
+                      styles.progressBarBackground,
+                      {
+                        // Higher-contrast neutral track depending on theme
+                        backgroundColor: isDark ? '#E2E2E2' : '#343434', 
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          // Use percentage string for width; React Native allows '50%'.
+                          width: d.percent === 0 ? 0 : `${d.percent}%`,
+                          // Ensure tiny non-zero percentages are still visible
+                          backgroundColor: color,
+                          // Add subtle shadow / elevation-like effect for contrast (iOS shadow props are ignored on Android but harmless)
+                          
+                        },
+                      ]}
+                    />
                   </View>
                 </View>
               ))}
             </View>
           );
         })}
-      </ThemedView>
+      </View>
     </ParallaxScrollView>
   );
 }
@@ -163,11 +181,13 @@ const styles = StyleSheet.create({
 
   progressBarBackground: {
     height: 8,
-    backgroundColor: '#222',
-    opacity: 0.06,
+    // base color overridden dynamically; keep a fallback
+    backgroundColor: '#E2E2E2',
     borderRadius: 6,
     marginTop: 4,
     overflow: 'hidden',
+    width: '100%', // ensure the bar has measurable width so percentage fill renders
+    borderWidth: 1,
   },
   progressBarFill: {
     height: '100%',
