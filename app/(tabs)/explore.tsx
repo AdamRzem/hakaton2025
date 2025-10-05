@@ -1,8 +1,7 @@
-import { StyleSheet, useColorScheme } from 'react-native';
+import { Image, StyleSheet, useColorScheme } from 'react-native';
 
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Palette } from '@/constants/theme';
 import { trpc } from '@/utils/trpc';
 import { Button } from '@react-navigation/elements';
@@ -30,12 +29,7 @@ export default function TabTwoScreen() {
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#F5F5F5', dark: '#000' }}
       headerImage={
-        <IconSymbol
-          size={310}
-          color={isDark ? '#2a2a2a' : '#d9d9d9'}
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
+        <Image source={require('../../assets/images/icon (2).png')} style={{ width: '100%', height: 100, marginTop: 32 }} contentFit="cover" />
       }
     >
       <ThemedView lightColor="#fff" darkColor="#000" style={styles.container}>
@@ -54,7 +48,7 @@ export default function TabTwoScreen() {
         {data.data?.map((report, idx) => {
           const parsed = new Date(report.date);
           const dateDisplay = isNaN(parsed.getTime()) ? report.date : parsed.toLocaleString();
-            const authorDisplay = report.user?.email || 'Admin';
+          const authorDisplay = report.user?.email || 'Admin';
           const border = pickColor(idx);
           return (
             <View
@@ -69,7 +63,7 @@ export default function TabTwoScreen() {
             >
               <View style={styles.cardHeaderRow}>
                 <Text style={[styles.reportDate, { color: isDark ? '#EEE' : '#111' }]}>{dateDisplay}</Text>
-                <View style={[styles.badge, { backgroundColor: border }]}> 
+                <View style={[styles.badge, { backgroundColor: border }]}>
                   <Text style={styles.badgeText}>{authorDisplay === 'Admin' ? 'ADMIN' : 'USER'}</Text>
                 </View>
               </View>
