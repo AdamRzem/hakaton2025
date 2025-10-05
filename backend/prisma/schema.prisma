@@ -22,6 +22,8 @@ model User{
   reports Report[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  upvoted Upvoted[]
+  downvoted Downvoted[]
 }
 
 model Report{
@@ -35,4 +37,24 @@ model Report{
   score Int @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  upvotes Upvoted[]
+  downvotes Downvoted[]
+}
+model Upvoted{
+  upvotedId String @id @default(cuid())
+  userId String
+  reportId String
+  user User @relation(fields: [userId], references: [userId])
+  report Report @relation(fields: [reportId], references: [reportId])
+  createdAt DateTime @default(now())
+  @@unique([userId, reportId])
+}
+model Downvoted{
+  downvotedId String @id @default(cuid())
+  userId String
+  reportId String
+  user User @relation(fields: [userId], references: [userId])
+  report Report @relation(fields: [reportId], references: [reportId])
+  createdAt DateTime @default(now())
+  @@unique([userId, reportId])
 }

@@ -1,11 +1,13 @@
-import { Image, StyleSheet, useColorScheme } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Image, StyleSheet, TouchableOpacity, useColorScheme } from 'react-native';
 
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedView } from '@/components/themed-view';
 import { Palette } from '@/constants/theme';
 import { trpc } from '@/utils/trpc';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button } from '@react-navigation/elements';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'expo-router';
 import { Text, View } from 'react-native';
 
@@ -22,14 +24,23 @@ function pickColor(index?: number) {
 }
 
 export default function TabTwoScreen() {
-  const data = useQuery(trpc.getReports.queryOptions());
+  const queryClient = useQueryClient();
+  const [token, setToken] = useState<string | null>(null);
+  useEffect(() => {
+    AsyncStorage.getItem('token').then(setToken).catch(()=>setToken(null));
+  }, []);
+  const reportQueryOptions = trpc.getReports.queryOptions({ toke: token || undefined });
+  const reportQueryKey = reportQueryOptions.queryKey;
+  const data = useQuery({ ...reportQueryOptions });
+  const upvoter=useMutation(trpc.upvote.mutationOptions());
+  const downvoter=useMutation(trpc.downovote.mutationOptions());
   const isDark = useColorScheme() === 'dark';
 
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#F5F5F5', dark: '#000' }}
       headerImage={
-        <Image source={require('../../assets/images/icon (2).png')} style={{ width: '100%', height: 100, marginTop: 32 }} contentFit="cover" />
+  <Image source={require('../../assets/images/icon (2).png')} style={{ width: '100%', height: 100, marginTop: 32 }} />
       }
     >
       <ThemedView lightColor="#fff" darkColor="#000" style={styles.container}>
@@ -45,11 +56,28 @@ export default function TabTwoScreen() {
           <Text style={styles.infoText}>No reports yet.</Text>
         )}
 
-        {data.data?.map((report, idx) => {
+        {(() => {
+          // Build a memoized map of userId -> total score across their reports
+          const userTotals = useMemo(() => {
+            const totals: Record<string, number> = {};
+            (data.data || []).forEach((r: any) => {
+              if (r.user) {
+                const id = r.user.userId;
+                const s = typeof r.score === 'number' ? r.score : 0;
+                totals[id] = (totals[id] || 0) + s;
+              }
+            });
+            return totals;
+          }, [data.data]);
+
+          return data.data?.map((report: any, idx: number) => {
           const parsed = new Date(report.date);
           const dateDisplay = isNaN(parsed.getTime()) ? report.date : parsed.toLocaleString();
           const authorDisplay = report.user?.email || 'Admin';
           const border = pickColor(idx);
+          // Determine badge text: total score for user or ADMIN
+          const badgeText = report.user ? String(userTotals[report.user.userId] ?? 0) : 'ADMIN';
+          const isAdminPost = !report.user; // admin posts have no associated user object
           return (
             <View
               key={report.reportId}
@@ -64,12 +92,51 @@ export default function TabTwoScreen() {
               <View style={styles.cardHeaderRow}>
                 <Text style={[styles.reportDate, { color: isDark ? '#EEE' : '#111' }]}>{dateDisplay}</Text>
                 <View style={[styles.badge, { backgroundColor: border }]}>
-                  <Text style={styles.badgeText}>{authorDisplay === 'Admin' ? 'ADMIN' : 'USER'}</Text>
+                  <Text style={styles.badgeText}>{badgeText}</Text>
                 </View>
               </View>
               <Text style={styles.metaText}>Source: {authorDisplay}</Text>
               <Text style={styles.metaText}>Line: {report.lineNumber ?? 'not set'}</Text>
               <Text style={styles.metaText}>Description: {report.description || 'No description'}</Text>
+              {!isAdminPost && (
+                <View style={styles.voteRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.voteButton,
+                      report.userVote==='up' ? { backgroundColor: border, opacity: 1 } : { backgroundColor: border, opacity: 0.4 }
+                    ]}
+                    onPress={async ()=>{
+                      try {
+                        if(!token) return;
+                        const res = await upvoter.mutateAsync({ toke: token, reportId: report.reportId });
+                        queryClient.setQueryData(reportQueryKey as any, (old: any)=> Array.isArray(old) ? old.map((r:any)=> r.reportId===report.reportId ? { ...r, score: res.score, userVote: res.userVote } : r) : old);
+                      } catch(e){
+                        console.log('upvote error', e);
+                      }
+                    }}
+                  >
+                    <Text style={styles.voteText}>▲</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.scoreText}>{(report as any).score ?? 0}</Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.voteButton,
+                      report.userVote==='down' ? { backgroundColor: border, opacity: 1 } : { backgroundColor: border, opacity: 0.4 }
+                    ]}
+                    onPress={async ()=>{
+                      try {
+                        if(!token) return;
+                        const res = await downvoter.mutateAsync({ toke: token, reportId: report.reportId });
+                        queryClient.setQueryData(reportQueryKey as any, (old: any)=> Array.isArray(old) ? old.map((r:any)=> r.reportId===report.reportId ? { ...r, score: res.score, userVote: res.userVote } : r) : old);
+                      } catch(e){
+                        console.log('downvote error', e);
+                      }
+                    }}
+                  >
+                    <Text style={styles.voteText}>▼</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
               <Link
                 href="/(tabs)/antek"
                 style={[
@@ -81,7 +148,7 @@ export default function TabTwoScreen() {
               </Link>
             </View>
           );
-        })}
+        });})()}
       </ThemedView>
     </ParallaxScrollView>
   );
@@ -121,4 +188,8 @@ const styles = StyleSheet.create({
   badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   badgeText: { fontSize: 10, fontWeight: '700', color: '#fff', letterSpacing: 1 },
   mapLink: { marginTop: 12, fontWeight: '600' },
+  voteRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 8 },
+  voteButton: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6 },
+  voteText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  scoreText: { fontSize: 16, fontWeight: '700', color: '#888', minWidth: 30, textAlign: 'center' },
 });
