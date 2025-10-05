@@ -1,12 +1,14 @@
 import { TRPCError } from "@trpc/server";
-import { createHTTPServer } from '@trpc/server/adapters/standalone';
+import * as trpcExpress from '@trpc/server/adapters/express';
 import argon from "argon2";
+import express from "express";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { db } from "./db";
 import { publicProcedure, router } from './trpc';
-const SUPER_SECRET_KEY = "testing" as const;
 
+const SUPER_SECRET_KEY = "testing" as const;
+const API_KEY = "testing123" as const;
 const appRouter = router({
     register: publicProcedure.input(z.object({ email: z.email(), password: z.string() })).mutation(async (opts) => {
         const hash = await argon.hash(opts.input.password)
@@ -53,11 +55,28 @@ const appRouter = router({
         return db.report.findMany({ include: { user: true } })
     })
 });
-const server = createHTTPServer({
-    router: appRouter,
-});
 
-server.listen(3000, "0.0.0.0");
+const app = express();
+app.use(
+    '/trpc',
+    trpcExpress.createExpressMiddleware({
+        router: appRouter,
+    }),
+);
+app.post("/api/v1/addDelay", express.json(), async (req, res) => {
+    const apiKey = req.headers["x-api-key"];
+    if (apiKey !== API_KEY) {
+        res.status(403).json({ error: "Forbidden" });
+        return;
+    }
+    const body = z.object({ lineNumber: z.number(), delayMinutes: z.number(), reason: z.string().min(5).max(500), date: z.date(), location: z.string() }).safeParse(req.body);
+    if (!body.success) {
+        res.status(400).json({ error: "Invalid request body", details: body.error.errors });
+        return;
+    }
+    await db.report.create({ data: { lineNumber: body.data.lineNumber, date: body.data.date.toISOString(), location: body.data.location, description: body.data.reason } });
+});
+app.listen(3000);
 
 // Export type router type signature,
 // NOT the router itself.
