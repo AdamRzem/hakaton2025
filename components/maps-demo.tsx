@@ -73,7 +73,7 @@ export default function App() {
   ));
 
   // Debugging
-  console.log('maps-demo reports:', reports);
+  // console.log('maps-demo reports:', reports);
   const [selected, setSelected] = useState<null | { id: string; description: string; line: string; coordinate: { latitude: number; longitude: number } }>(null);
 
   const mapRef = useRef<MapView | null>(null);
