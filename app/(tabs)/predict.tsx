@@ -121,7 +121,7 @@ export default function PredictionsScreen() {
                       styles.progressBarBackground,
                       {
                         // Higher-contrast neutral track depending on theme
-                        backgroundColor: isDark ? '#E2E2E2' : '#343434',
+                        backgroundColor: isDark ? '#E2E2E2' : '#343434', 
                       },
                     ]}
                   >
